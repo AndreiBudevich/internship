@@ -1,27 +1,30 @@
 package com.game.controller;
 
 import com.game.entity.Player;
-import com.game.service.PlayerServiceImpl;
+import com.game.service.PlayerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 
 import java.util.List;
 
 
-@Controller
+@RestController
 public class PlayerController {
-    private PlayerServiceImpl playerServiceImpl;
+    @Autowired
+    private PlayerService playerService;
 
-    @RequestMapping(value="/", method=RequestMethod.GET)
-    public ModelAndView list() {
-        ModelAndView model = new ModelAndView("index");
-        List<Player> playerList = playerServiceImpl.findAll();
-        model.addObject("List", playerList);
-        return model;
+    @GetMapping("/rest/players")
+    public ResponseEntity<List<Player>> getAllPlayer(){
+
+        List<Player> players = playerService.listAll();
+        return new ResponseEntity<List<Player>>(players, HttpStatus.OK);
     }
+
 
 
 }

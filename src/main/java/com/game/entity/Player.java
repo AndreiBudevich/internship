@@ -9,7 +9,7 @@ import java.time.ZoneId;
 import java.util.Objects;
 @Entity
 @Table(name = "player")
-public class Player implements Serializable {
+public class Player {
 
 
     @Id
