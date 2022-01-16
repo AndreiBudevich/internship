@@ -1,6 +1,6 @@
 package com.game.service;
 
-import com.game.model.Player;
+import com.game.entity.Player;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
