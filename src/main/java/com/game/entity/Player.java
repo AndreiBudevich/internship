@@ -48,20 +48,20 @@ public class Player {
         this.untilNextLevel = untilNextLevel;
     }
 
-    public Player(Long id, String name, String title, Race race, Profession profession, Date birthday, Integer experience, Integer level, Integer untilNextLevel) {
+    public Player(String name, String title, Race race, Profession profession, Date birthday,
+                  Boolean banned, Integer experience, Integer level, Integer untilNextLevel) {
 
-        this.id = id;
+
         this.name = name;
         this.title = title;
         this.race = race;
         this.profession = profession;
         this.birthday = birthday;
-        this.banned = false;
+        this.banned = banned;
         this.experience = experience;
         this.level = level;
         this.untilNextLevel = untilNextLevel;
     }
-
 
 
     public Long getId() {
@@ -133,29 +133,17 @@ public class Player {
     }
 
     public void setLevel(Integer level) {
-        this.level = levelCalculation(experience);
+        this.level = level;
+    }
+
+    public void setUntilNextLevel(Integer untilNextLevel) {
+        this.untilNextLevel = untilNextLevel;
     }
 
     public Integer getUntilNextLevel() {
         return untilNextLevel;
     }
 
-    public void setUntilNextLevel(Integer untilNextLevel) {
-        this.untilNextLevel = uNLC(levelCalculation(experience), experience);
-    }
-
-
-    private Integer levelCalculation(Integer experience) {
-        Double squareRoot = Double.valueOf(2500 + 200 + experience);
-        Integer square = (int) Math.round(Math.sqrt(squareRoot));
-        Integer result = (square - 50) / 100;
-        return result;
-    }
-
-    private Integer uNLC(Integer level, Integer experience) {
-        Integer result = 50 * (level + 1) * (level + 2) - experience;
-        return result;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -179,7 +167,7 @@ public class Player {
         return Objects.hash(id, name, title, race, profession, birthday, banned, experience, level, untilNextLevel);
     }
 
-    @Override
+
     public String toString() {
         return super.toString();
     }
