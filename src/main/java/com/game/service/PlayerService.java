@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -24,15 +25,20 @@ public class PlayerService {
         return (List<Player>) playerRepository.findAll();
     }
 
-    public void save(Player player) {
+    public Boolean existsById(Long id) {
+        return playerRepository.existsById(id);
+    }
+
+    public void save (Player player) {
         playerRepository.save(player);
+    }
+
+    public void saveAndFlush (Player player) {
+        playerRepository.saveAndFlush(player);
     }
 
     public void delete(Long id) {
         playerRepository.deleteById(id);
     }
-
-
-
 
 }

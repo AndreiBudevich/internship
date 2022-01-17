@@ -1,46 +1,41 @@
 package com.game.entity;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.Objects;
+
 @Entity
 @Table(name = "player")
 public class Player {
 
-
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
-
-    @Column(name = "name")
     public String name;
-    @Column(name = "title")
     public String title;
-    @Column(name = "race")
+    @Enumerated(EnumType.STRING)
     public Race race;
-    @Column(name = "profession")
+    @Enumerated(EnumType.STRING)
     public Profession profession;
-    @Column(name = "birthday")
-    public Long birthday;
-    @Column(name = "banned")
+    public Date birthday;
     public Boolean banned;
-    @Column(name = "experience")
     public Integer experience;
-    @Column(name = "level")
     public Integer level;
-    @Column(name = "untilNextLevel")
     public Integer untilNextLevel;
 
     public Player() {
     }
 
-    public Player(Long id, String name, String title, Race race, Profession profession, Long birthday,
-                          Boolean banned, Integer experience, Integer level, Integer untilNextLevel) {
+    public Player(Long id, String name, String title, Race race, Profession profession, Date birthday,
+                  Boolean banned, Integer experience, Integer level, Integer untilNextLevel) {
+
         this.id = id;
         this.name = name;
         this.title = title;
@@ -48,6 +43,20 @@ public class Player {
         this.profession = profession;
         this.birthday = birthday;
         this.banned = banned;
+        this.experience = experience;
+        this.level = level;
+        this.untilNextLevel = untilNextLevel;
+    }
+
+    public Player(Long id, String name, String title, Race race, Profession profession, Date birthday, Integer experience, Integer level, Integer untilNextLevel) {
+
+        this.id = id;
+        this.name = name;
+        this.title = title;
+        this.race = race;
+        this.profession = profession;
+        this.birthday = birthday;
+        this.banned = false;
         this.experience = experience;
         this.level = level;
         this.untilNextLevel = untilNextLevel;
@@ -95,11 +104,11 @@ public class Player {
         this.profession = profession;
     }
 
-    public Long getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Long birthday) {
+    public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
 
@@ -124,7 +133,7 @@ public class Player {
     }
 
     public void setLevel(Integer level) {
-        this.level = level;
+        this.level = levelCalculation(experience);
     }
 
     public Integer getUntilNextLevel() {
@@ -132,7 +141,20 @@ public class Player {
     }
 
     public void setUntilNextLevel(Integer untilNextLevel) {
-        this.untilNextLevel = untilNextLevel;
+        this.untilNextLevel = uNLC(levelCalculation(experience), experience);
+    }
+
+
+    private Integer levelCalculation(Integer experience) {
+        Double squareRoot = Double.valueOf(2500 + 200 + experience);
+        Integer square = (int) Math.round(Math.sqrt(squareRoot));
+        Integer result = (square - 50) / 100;
+        return result;
+    }
+
+    private Integer uNLC(Integer level, Integer experience) {
+        Integer result = 50 * (level + 1) * (level + 2) - experience;
+        return result;
     }
 
     @Override
@@ -159,12 +181,6 @@ public class Player {
 
     @Override
     public String toString() {
-        LocalDate birthday = Instant.ofEpochMilli(this.birthday).atZone(ZoneId.systemDefault()).toLocalDate();
-        return "PlayerInfoTest{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", birthday=" + birthday +
-                '}';
+        return super.toString();
     }
-
 }
