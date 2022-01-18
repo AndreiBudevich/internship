@@ -1,5 +1,8 @@
 package com.game.entity;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+
 public enum Race {
     HUMAN,
     DWARF,

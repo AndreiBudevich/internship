@@ -1,5 +1,9 @@
 package com.game.entity;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -13,22 +17,23 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "player")
+
 public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
-    public String name;
-    public String title;
+    private Long id;
+    private String name;
+    private String title;
     @Enumerated(EnumType.STRING)
-    public Race race;
+    private Race race;
     @Enumerated(EnumType.STRING)
-    public Profession profession;
-    public Date birthday;
-    public Boolean banned;
-    public Integer experience;
-    public Integer level;
-    public Integer untilNextLevel;
+    private Profession profession;
+    private Date birthday;
+    private Boolean banned;
+    private Integer experience;
+    private Integer level;
+    private Integer untilNextLevel;
 
     public Player() {
     }
@@ -168,7 +173,19 @@ public class Player {
     }
 
 
+    @Override
     public String toString() {
-        return super.toString();
+        return "Player{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", title='" + title + '\'' +
+                ", race=" + race +
+                ", profession=" + profession +
+                ", birthday=" + birthday +
+                ", banned=" + banned +
+                ", experience=" + experience +
+                ", level=" + level +
+                ", untilNextLevel=" + untilNextLevel +
+                '}';
     }
 }
