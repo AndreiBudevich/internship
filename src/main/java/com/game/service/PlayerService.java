@@ -49,7 +49,7 @@ public class PlayerService {
         playerRepository.save(player);
     }
 
-    public Player findPlayer (Player player) {
+    public Player findPlayer(Player player) {
         Player playernew = null;
         for (Player playerBD : playerRepository.findAll()) {
             if (playerBD.equals(player)) playernew = playerBD;
@@ -60,7 +60,6 @@ public class PlayerService {
     public void saveAndFlush(Player player) {
         playerRepository.saveAndFlush(player);
     }
-
 
 
     public void delete(Long id) {

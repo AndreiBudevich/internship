@@ -19,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.awt.print.Pageable;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,6 +29,10 @@ public class PlayerController {
     @Autowired
     private PlayerService playerService;
 
+    static Calendar date2000 = new GregorianCalendar(2000, 01, 01, 0, 0, 0);
+    static Calendar date3000 = new GregorianCalendar(3001, 01, 01, 0, 0, 0);
+    Date date2 = date2000.getTime();
+    Date date3 = date3000.getTime();
 
     @GetMapping(path = "/rest/players")
     public List<Player> getAllPlayers(
@@ -152,12 +157,12 @@ public class PlayerController {
         player.setBanned(player.getBanned() == null ? false : player.getBanned());
 
 
-        Integer level = (int) Math.round((Math.sqrt(2500 + 200 * player.getExperience()) - 50) / 100);
-        Integer untilNextLevel = 50 * (level + 1) * (level + 2) - player.getExperience();
+        Integer level = updateLevel(player.getExperience());
+        Integer untilNextLevel = updateUntilNextLevel(player.getExperience(), level);
 
         Player playernew = new Player(player.getName(), player.getTitle(), player.getRace(), player.getProfession(), player.getBirthday(),
                 player.getBanned(), player.getExperience(), level, untilNextLevel);
-        playerService.saveAndFlush(playernew);
+        playerService.save(playernew);
 
         Player playernew2 = playerService.findPlayer(playernew);
 
@@ -167,28 +172,34 @@ public class PlayerController {
     }
 
     public Boolean isnotValidExperience(Integer experience) {
-        if (experience < 0 && experience > 10_000_000) return true;
+        if (experience < 0 || experience > 10_000_000) return true;
         return false;
     }
 
     public Boolean isnotValidtitle(String title) {
-        if (title == null && title.length() > 30) return true;
+        if (title == null || title.length() > 30) return true;
         return false;
     }
 
     public Boolean isnotValidName(String name) {
-        if (name == null && name.length() > 12 && name.equals("")) return true;
+        if (name == null || name.length() > 12 || name.equals("")) return true;
         return false;
     }
 
     public Boolean isnotValidBirthday(Date birthday) {
-        Calendar date2000 = new GregorianCalendar(2000, 01, 01, 0, 0, 0);
-        Calendar date3000 = new GregorianCalendar(3001, 01, 01, 0, 0, 0);
-        Date date2 = date2000.getTime();
-        Date date3 = date2000.getTime();
-        if (birthday.getTime() < date2.getTime() && !(birthday.getTime() < date3.getTime())) return false;
-        if (birthday.getTime() < 0) return false;
-        return true;
+        if (!(birthday.getTime() >= date2.getTime()) || !(birthday.getTime() < date3.getTime())) return true;
+        if (birthday.getTime() < 0) return true;
+        return false;
+    }
+
+    public Integer updateLevel(Integer experience) {
+        Integer level = (int) Math.round((Math.sqrt(2500 + 200 * experience) - 50) / 100);
+        return level;
+    }
+
+    public Integer updateUntilNextLevel(Integer experience, Integer level) {
+        Integer untilNextLevel = 50 * (level + 1) * (level + 2) - experience;
+        return untilNextLevel;
     }
 
 
@@ -205,27 +216,64 @@ public class PlayerController {
     }
 
     @PostMapping("/rest/players/{id}")
-    public ResponseEntity<Player> updatePlayer(@RequestBody Player player) {
+    public ResponseEntity Update(@PathVariable(value = "id", required = false) Long id,
+                                 @RequestBody Player player) {
+        if (id <= 0) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        if (!playerService.existsById(id)) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        if (player.getExperience() != null && (player.getExperience() < 0 || player.getExperience() > 10_000_000)) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        if (player.getTitle() != null && player.getTitle().length() > 30) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        if (player.getName() != null && (player.getName().length() > 12 || player.getName().equals(""))) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
 
-        Player playerResult = playerService.getPlayerById(player.getId());
+        if (player.getBirthday() != null && (!(player.getBirthday().getTime() >= date2.getTime()) || !(player.getBirthday().getTime() < date3.getTime()))) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
 
-        if (player.getName() != null) {playerResult.setName(player.getName());}
-        if (player.getTitle() != null) {playerResult.setTitle(player.getTitle());}
-        if (player.getRace() != null) {playerResult.setRace(player.getRace());}
 
+        Player playerResult = playerService.getPlayerById(id);
+
+        if (player.getName() != null) {
+            playerResult.setName(player.getName());
+        }
+        if (player.getTitle() != null) {
+            playerResult.setTitle(player.getTitle());
+        }
+        if (player.getRace() != null) {
+            playerResult.setRace(player.getRace());
+        }
+        if (player.getProfession() != null) {
+            playerResult.setProfession(player.getProfession());
+        }
+        if (player.getBirthday() != null) {
+            playerResult.setBirthday(player.getBirthday());
+        }
+        if (player.getBanned() != null) {
+            playerResult.setBanned(player.getBanned());
+        }
+        if (player.getExperience() != null) {
+            playerResult.setExperience(player.getExperience());
+            Integer level = updateLevel(player.getExperience());
+            Integer untilNextLevel = updateUntilNextLevel(player.getExperience(), level);
+            playerResult.setLevel(level);
+            playerResult.setUntilNextLevel(untilNextLevel);
+        }
+
+
+
+        playerService.save(playerResult);
 
         return ResponseEntity.ok(playerResult);
+    }
 }
-
-
-
-}
-
-
-
-
-
-
 
 
 

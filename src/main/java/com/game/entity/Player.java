@@ -155,8 +155,7 @@ public class Player {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Player that = (Player) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(name, that.name) &&
+        return  Objects.equals(name, that.name) &&
                 Objects.equals(title, that.title) &&
                 race == that.race &&
                 profession == that.profession &&
