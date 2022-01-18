@@ -267,8 +267,6 @@ public class PlayerController {
             playerResult.setUntilNextLevel(untilNextLevel);
         }
 
-
-
         playerService.save(playerResult);
 
         return ResponseEntity.ok(playerResult);

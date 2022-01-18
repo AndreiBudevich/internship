@@ -20,17 +20,9 @@ public class PlayerService {
 
 
     public List<Player> listAll() {
-        return (List<Player>) playerRepository.findAll();
+        return playerRepository.findAll();
     }
 
-    public Long maxId() {
-        List<Player> playerList = playerRepository.findAll();
-        Long maxId = 0L;
-        for (Player player : playerList) {
-            if (player.getId() > maxId) maxId = player.getId();
-        }
-        return maxId;
-    }
 
     public List<Player> listAllsort(Pageable pageable) {
         return playerRepository.findAll((Sort) pageable);
@@ -44,7 +36,6 @@ public class PlayerService {
         return playerRepository.findById(id).get();
     }
 
-
     public void save(Player player) {
         playerRepository.save(player);
     }
@@ -55,10 +46,6 @@ public class PlayerService {
             if (playerBD.equals(player)) playernew = playerBD;
         }
         return playernew;
-    }
-
-    public void saveAndFlush(Player player) {
-        playerRepository.saveAndFlush(player);
     }
 
 
