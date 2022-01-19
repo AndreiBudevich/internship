@@ -7,6 +7,7 @@ import com.game.entity.Profession;
 import com.game.entity.Race;
 import com.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -51,11 +52,109 @@ public class PlayerController {
             @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
             @RequestParam(value = "pageSize", required = false) Integer pageSize
     ) {
-        List<Player> players = playerService.listAll();
+        if (pageSize == null) {
+            pageSize = 3;
+        }
+        if (pageNumber == null) {
+            pageNumber = 0;
+        }
+        if (order == null) {
+            order = PlayerOrder.ID;
+        }
 
-        return players;
+        PlayerOrder finalOrder = order;
+        List<Player> playerList = playerService.listAll().stream()
+                .sorted(((player1, player2) -> {
+                    if (PlayerOrder.LEVEL.equals(finalOrder)) {
+                        return player1.getLevel().compareTo(player2.getLevel());
+                    }
+                    if (PlayerOrder.BIRTHDAY.equals(finalOrder)) {
+                        return player1.getBirthday().compareTo(player2.getBirthday());
+                    }
+
+                    if (PlayerOrder.EXPERIENCE.equals(finalOrder)) {
+                        return player1.getExperience().compareTo(player2.getExperience());
+                    }
+                    if (PlayerOrder.NAME.equals(finalOrder)) {
+                        return player1.getName().compareTo(player2.getName());
+                    }
+                    return player1.getId().compareTo(player2.getId());
+                }))
+                .filter(player -> name == null || player.getName().contains(name))
+                .filter(player -> title == null || player.getTitle().contains(title))
+                .filter(player -> race == null || player.getRace().equals(race))
+                .filter(player -> profession == null || player.getProfession().equals(profession))
+                .filter(player -> after == null || player.getBirthday().getTime() > after )
+                .filter(player -> before == null || player.getBirthday().getTime() < before)
+                .filter(player -> banned == null || player.getBanned().equals(banned))
+                .filter(player -> minExperience == null || player.getExperience() >= minExperience)
+                .filter(player -> maxExperience == null || player.getExperience() <= maxExperience)
+                .filter(player -> minLevel == null || player.getLevel() >= minLevel)
+                .filter(player -> maxLevel == null || player.getLevel() <= maxLevel)
+                .skip(pageSize*pageNumber)
+                .limit(pageSize).collect(Collectors.toList());
+        return playerList;
     }
 
+
+
+
+
+
+    @GetMapping(path = "/rest/players/count")
+    public Integer getCountPlayers(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "race", required = false) Race race,
+            @RequestParam(value = "profession", required = false) Profession profession,
+            @RequestParam(value = "after", required = false) Long after,
+            @RequestParam(value = "before", required = false) Long before,
+            @RequestParam(value = "banned", required = false) Boolean banned,
+            @RequestParam(value = "minExperience", required = false) Integer minExperience,
+            @RequestParam(value = "maxExperience", required = false) Integer maxExperience,
+            @RequestParam(value = "minLevel", required = false) Integer minLevel,
+            @RequestParam(value = "maxLevel", required = false) Integer maxLevel,
+            @RequestParam(value = "order", required = false) PlayerOrder order,
+            @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize
+    ) {
+
+        if (order == null) {
+            order = PlayerOrder.ID;
+        }
+
+        PlayerOrder finalOrder = order;
+        List<Player> playerList = playerService.listAll().stream()
+                .sorted(((player1, player2) -> {
+                    if (PlayerOrder.LEVEL.equals(finalOrder)) {
+                        return player1.getLevel().compareTo(player2.getLevel());
+                    }
+                    if (PlayerOrder.BIRTHDAY.equals(finalOrder)) {
+                        return player1.getBirthday().compareTo(player2.getBirthday());
+                    }
+
+                    if (PlayerOrder.EXPERIENCE.equals(finalOrder)) {
+                        return player1.getExperience().compareTo(player2.getExperience());
+                    }
+                    if (PlayerOrder.NAME.equals(finalOrder)) {
+                        return player1.getName().compareTo(player2.getName());
+                    }
+                    return player1.getId().compareTo(player2.getId());
+                }))
+                .filter(player -> name == null || player.getName().contains(name))
+                .filter(player -> title == null || player.getTitle().contains(title))
+                .filter(player -> race == null || player.getRace().equals(race))
+                .filter(player -> profession == null || player.getProfession().equals(profession))
+                .filter(player -> after == null || player.getBirthday().getTime() > after)
+                .filter(player -> before == null || player.getBirthday().getTime() < before)
+                .filter(player -> banned == null || player.getBanned().equals(banned))
+                .filter(player -> minExperience == null || player.getExperience() >= minExperience)
+                .filter(player -> maxExperience == null || player.getExperience() <= maxExperience)
+                .filter(player -> minLevel == null || player.getLevel() >= minLevel)
+                .filter(player -> maxLevel == null || player.getLevel() <= maxLevel)
+                .collect(Collectors.toList());
+        return playerList.size();
+    }
 
     @GetMapping(path = "a/rest/players/{id}")
     @ResponseBody
@@ -86,44 +185,6 @@ public class PlayerController {
         }
         Player result = playerService.getPlayerById(id);
         return ResponseEntity.ok(result);
-    }
-
-
-    @GetMapping(path = "/rest/players/count")
-    public String getAll(
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "race", required = false) Race race,
-            @RequestParam(value = "profession", required = false) Profession profession,
-            @RequestParam(value = "after", required = false) Long after,
-            @RequestParam(value = "before", required = false) Long before,
-            @RequestParam(value = "banned", required = false) Boolean banned,
-            @RequestParam(value = "minExperience", required = false) Integer minExperience,
-            @RequestParam(value = "maxExperience", required = false) Integer maxExperience,
-            @RequestParam(value = "minLevel", required = false) Integer minLevel,
-            @RequestParam(value = "maxLevel", required = false) Integer maxLevel,
-            @RequestParam(value = "order", required = false) PlayerOrder order,
-            @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-
-        if (pageSize == null) pageSize = 3;
-        if (pageNumber == null) pageNumber = 0;
-        if (order == null) order = PlayerOrder.ID;
-
-        List<Player> playerList = playerService.listAllsort((Pageable) PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()))).stream()
-                .filter(player -> name == null || player.getName().contains(name))
-                .filter(player -> title == null || player.getTitle().contains(title))
-                .filter(player -> race == null || player.getRace().equals(race))
-                .filter(player -> profession == null || player.getProfession().equals(profession))
-                .filter(player -> after == null || player.getBirthday().getTime() > after)
-                .filter(player -> before == null || player.getBirthday().getTime() < before)
-                .filter(player -> banned == null || player.getBanned().equals(banned))
-                .filter(player -> minExperience == null || player.getExperience() >= minExperience)
-                .filter(player -> maxExperience == null || player.getExperience() <= maxExperience)
-                .filter(player -> minLevel == null || player.getLevel() >= minLevel)
-                .filter(player -> maxLevel == null || player.getLevel() <= maxLevel)
-                .collect(Collectors.toList());
-        return "redirect:/";
     }
 
 
@@ -162,13 +223,8 @@ public class PlayerController {
 
         Player playernew = new Player(player.getName(), player.getTitle(), player.getRace(), player.getProfession(), player.getBirthday(),
                 player.getBanned(), player.getExperience(), level, untilNextLevel);
-        playerService.save(playernew);
 
-        Player playernew2 = playerService.findPlayer(playernew);
-
-        System.out.println(playernew2);
-
-        return ResponseEntity.ok(playernew2);
+        return ResponseEntity.ok(playerService.savePlayer(playernew));
     }
 
     public Boolean isnotValidExperience(Integer experience) {
@@ -193,7 +249,7 @@ public class PlayerController {
     }
 
     public Integer updateLevel(Integer experience) {
-        Integer level = (int) Math.round((Math.sqrt(2500 + 200 * experience) - 50) / 100);
+        Integer level = (int) (Math.sqrt(2500 + 200 * experience) - 50) / 100;
         return level;
     }
 
@@ -267,9 +323,7 @@ public class PlayerController {
             playerResult.setUntilNextLevel(untilNextLevel);
         }
 
-        playerService.save(playerResult);
-
-        return ResponseEntity.ok(playerResult);
+        return ResponseEntity.ok(playerService.savePlayer(playerResult));
     }
 }
 
